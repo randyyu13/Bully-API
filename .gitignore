@@ -1,0 +1,5 @@
+__pycache__/
+.env
+.txt
+google-credentials.json
+node_modules
