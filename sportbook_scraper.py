@@ -6,7 +6,7 @@ sportbook_links = {
     'bet365' : 'https://www.la.bet365.com/',
     'draftkings' : 'https://sportsbook.draftkings.com/',
     'fanduel' : 'https://sportsbook.fanduel.com/',
-    'betmgm' : 'https://sports.ny.betmgm.com/en/ ',
+    'betmgm' : 'https://sports.ny.betmgm.com/en/',
     'espnbet' : 'https://espnbet.com/',
     'betrivers' : 'https://pa.betrivers.com/?page=sportsbook',
     'partycasino' : 'https://sports.partycasino.com/en-ca/sports'
@@ -60,9 +60,29 @@ class sportbook_scraper:
 
     def __player_props_bet365(book: sportsbook):
         with sync_playwright() as p:
-            browser = p.chromium.launch(executable_path=os.getenv("CHROMIUM_EXECUTABLE_PATH"))
+            browser = p.chromium.launch(executable_path=os.getenv('CHROMIUM_EXECUTABLE_PATH'))
             page = browser.new_page()
             page.goto(book.get_url())
+
+            page.wait_for_load_state('networkidle')
+
+            button = page.locator('.wn-PreMatchItem:has-text("NBA")')
+            button.click()
+
+            page.wait_for_load_state("networkidle")
+
+            all_games = page.query_selector_all('.ParticipantFixtureDetailsHigherBasketball_LhsContainerInner')
+            
+            for game in all_games:
+                if(game.query_selector('.pi-CouponParticipantClockInPlay_Extra')):
+                    continue
+                game.click()
+                page.wait_for_load_state('networkidle')
+
+                player_parlays = page.locator('.bmp-TabButton.bmp-TabButton-7:has-text("Player")')
+
+
+
             
         return
     
