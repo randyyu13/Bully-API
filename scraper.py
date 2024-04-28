@@ -90,13 +90,11 @@ class scraper:
                 if num_cols_in_row == 3:
                     # this is the over under for other sportsbook for the stat, this is the data we want for the api.
                     over_line_and_odds = row.query_selector('.other-over-odds').text_content().split()
-                    over_line = float(over_line_and_odds[0][1:])
+                    line = float(over_line_and_odds[0][1:])
                     over_odds = eval(re.sub(r',', '', over_line_and_odds[1]))
                     under_line_and_odds = row.query_selector('.other-under-odds').text_content().split()
-                    under_line = float(over_line_and_odds[0][1:])
                     under_odds = eval(re.sub(r',', '', under_line_and_odds[1]))
-                    stat_odds_for_different_sportbooks = {'oLine': over_line,
-                                                        'uLine': under_line,
+                    stat_odds_for_different_sportbooks = {'line': line,
                                                         'oOdds': over_odds,
                                                         'uOdds': under_odds}
 
@@ -104,8 +102,7 @@ class scraper:
                     odds_str = row.query_selector('.other-over-odds').text_content().split()[0]
                     odds_without_commas = re.sub(r',', '', odds_str)
                     parsed_odds = eval(odds_without_commas)
-                    stat_odds_for_different_sportbooks = {'oLine': 0.5,
-                                                        'uLine': 0.5,
+                    stat_odds_for_different_sportbooks = {'line': 0.5,
                                                         'oOdds': parsed_odds,
                                                         'uOdds': None}
                 
@@ -126,20 +123,18 @@ class scraper:
                 for sb in player_props_map[player][prop_type]:
                     # print(sb)
                     sb_data = player_props_map[player][prop_type][sb]
-                    number_of_cols = len(sb_data)
+                    # number_of_cols = len(sb_data)
                     # print(sb_data)
 
-                    over_line = None
-                    under_line = None
+                    line = None
                     over_odds = None
                     under_odds = None
                     # odds = None
 
-                    under_line = sb_data['uLine']
-                    over_line = sb_data['oLine']
+                    line = sb_data['line']
                     over_odds = sb_data['oOdds']
                     under_odds = sb_data['uOdds']
                     # else:
                     #     odds = sb_data['odds']
-                    print((player, prop_type, sb, over_line, under_line, over_odds, under_odds, datetime.now()))
-                    self.__cloudsql_broker.write_to_player_prop_table(player, prop_type, sb, over_line, under_line, over_odds, under_odds, datetime.now())
+                    print((player, prop_type, sb, line, over_odds, under_odds, datetime.now()))
+                    self.__cloudsql_broker.write_to_player_prop_table(player, prop_type, sb, line, over_odds, under_odds, datetime.now())

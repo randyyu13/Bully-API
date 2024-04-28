@@ -55,7 +55,7 @@ class cloudsql_server_broker:
             conn.close()
         return result
     
-    def write_to_player_prop_table(self, player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, timestamp):
+    def write_to_player_prop_table(self, player_name, prop_type, sportsbook, line, over_odds, under_odds, timestamp):
         """
         Writes data to the 'player_prop_table' table in the 'bullybot_api_database' database.
 
@@ -63,23 +63,20 @@ class cloudsql_server_broker:
             player_name (str): The name of the player (varchar(50)).
             prop_type (str): The type of bet proposition (varchar(50)).
             sportsbook (str): The sportsbook (varchar(50)).
-            over_line (float): The over line (decimal(18, 1)).
-            under_line (float): The under line (decimal(18, 1)).
+            line (float): The over line (decimal(18, 1)).
             over_odds (int): The over odds (int).
             under_odds (int): The under odds (int).
-            odds (int): The odds (int).
             timestamp (datetime): The timestamp of the data entry (datetime).
         """
         query = """
-        INSERT INTO player_prop_table (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, timestamp)
-        VALUES (:player_name, :prop_type, :sportsbook, :over_line, :under_line, :over_odds, :under_odds, :timestamp)
+        INSERT INTO player_prop_table (player_name, prop_type, sportsbook, line, over_odds, under_odds, timestamp)
+        VALUES (:player_name, :prop_type, :sportsbook, :line, :over_odds, :under_odds, :timestamp)
         """
         values = {
             'player_name': player_name,
             'prop_type': prop_type,
             'sportsbook': sportsbook,
-            'over_line': over_line,
-            'under_line': under_line,
+            'line': line,
             'over_odds': over_odds,
             'under_odds': under_odds,
             'timestamp': timestamp
