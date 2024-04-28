@@ -90,7 +90,6 @@ def update_db():
 
 def iterate_all_props():
     with sync_playwright() as p:
-        print('here')
         browser = p.chromium.launch()
         page = browser.new_page()
         page.goto('https://www.covers.com/sport/basketball/nba/player-props')
@@ -98,9 +97,8 @@ def iterate_all_props():
         matchups = page.query_selector_all('.props-matchup-list-item')
 
         number_of_matchups = len(matchups)
-        print(number_of_matchups)
+        
         i = 0
-
         player_prop_set = {}
         while i < number_of_matchups:
             player_props = page.query_selector_all('.player-prop-article')[1:]
