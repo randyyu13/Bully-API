@@ -35,7 +35,7 @@ class cloudsql_server_broker:
         )
         return pool
 
-    def execute_query(self, query: str):
+    def execute_query(self, query: str, values):
         """
         Executes a SQL query on the connected database.
 
@@ -45,5 +45,27 @@ class cloudsql_server_broker:
             sqlalchemy.engine.result.ResultProxy: The result of the query.
         """
         with self.__engine.connect() as conn:
-            result = conn.execute(query)
+            result = conn.execute(query, values)
         return result
+    
+    def write_to_player_prop_table(self, player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp):
+        """
+        Writes data to the 'player_prop_table' table in the 'bullybot_api_database' database.
+
+        Args:
+            player_name (str): The name of the player (varchar(50)).
+            prop_type (str): The type of bet proposition (varchar(50)).
+            sportsbook (str): The sportsbook (varchar(50)).
+            over_line (float): The over line (decimal(18, 1)).
+            under_line (float): The under line (decimal(18, 1)).
+            over_odds (int): The over odds (int).
+            under_odds (int): The under odds (int).
+            odds (int): The odds (int).
+            timestamp (datetime): The timestamp of the data entry (datetime).
+        """
+        query = """
+        INSERT INTO player_prop_table (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        values = (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp)
+        self.execute_query(query, values)

@@ -11,7 +11,7 @@ image_link_to_sportsbook = {
     'https://img.covers.com/covers/data/sportsbooks/bet_rivers_co.svg' : 'BetRivers'
     }
 
-def populate_player_props(player_link, player_props_map, player_name, browser):
+def populate_player_props(player_link, player_name, browser):
     print(f'https://www.covers.com{player_link}')
     page = browser.new_page()
     page.goto(f'https://www.covers.com{player_link}')
@@ -19,7 +19,7 @@ def populate_player_props(player_link, player_props_map, player_name, browser):
         page.wait_for_selector('.covers-CoversPlayer-Prop-Event')
     except:
         print("timed out waiting for cards")
-        return
+        return {}
     all_cards = page.query_selector_all('.covers-CoversPlayer-Prop-Event')
     expanded_player_name = ' '.join(page.query_selector("h1").text_content().split()[:-4])
     print(expanded_player_name)
@@ -61,12 +61,29 @@ def populate_player_props(player_link, player_props_map, player_name, browser):
             if current_stat not in prop_data_map:
                 prop_data_map[current_stat] = {}
             prop_data_map[current_stat][sportsbook_name] = stat_odds_for_different_sportbooks
-    
+
+    player_props_map = {}
     player_props_map[player_name] = {}
     player_props_map[player_name][expanded_player_name] = prop_data_map
-    print(player_props_map)
-    print('\n')
+    # print(player_props_map)
+    # print('\n')
 
+def upload_props_to_db(player_props_map):
+    over_line, under_line, over_odds, under_odds, odds = None
+    for player in player_props_map:
+        for prop_type in player_props_map[player]:
+            for sb in player_props_map[player][prop_type]:
+                sb_data = player_props_map[player][prop_type][sb]
+                number_of_cols = len(sb_data)
+                if number_of_cols == 4:
+                    under_line = sb_data['uLine']
+                    over_line = sb_data['oLine']
+                    over_odds = sb_data['oOdds']
+                    under_odds = sb_data['uOdds']
+                else:
+                    odds = sb_data['odds']
+                # write_to_player_prop_table(player, prop_type, sb, over_line, under_line, over_odds, under_odds, odds, '''timestamp''')
+                
 def update_db():
     iterate_all_props()
     return
@@ -84,15 +101,17 @@ def iterate_all_props():
         print(number_of_matchups)
         i = 0
 
-        player_prop_map = {}
+        player_prop_set = {}
         while i < number_of_matchups:
             player_props = page.query_selector_all('.player-prop-article')[1:]
             for prop in player_props:
                 player_link_element = prop.query_selector('.player-link')
                 player_name = player_link_element.text_content()
                 player_link = player_link_element.get_attribute('href')
-                if player_name not in player_prop_map:
-                    populate_player_props(player_link, player_prop_map, player_name, browser)
+                if player_name not in player_prop_set:
+                    player_prop_set.add(player_name)
+                    player_prop_map = populate_player_props(player_link, player_name, browser)
+
             i += 1
             matchups[i].click()
             page.wait_for_load_state("networkidle")
