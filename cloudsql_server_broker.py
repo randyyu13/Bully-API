@@ -71,7 +71,7 @@ class cloudsql_server_broker:
             timestamp (datetime): The timestamp of the data entry (datetime).
         """
         query = """
-        INSERT INTO player_prop_table (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp)
+        INSERT INTO player_prop_table (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, timestamp)
         VALUES (:player_name, :prop_type, :sportsbook, :over_line, :under_line, :over_odds, :under_odds, :timestamp)
         """
         values = {
