@@ -18,6 +18,23 @@ class scraper:
             'https://img.covers.com/covers/data/sportsbooks/caesars.svg' : 'Caesars',
             'https://img.covers.com/covers/data/sportsbooks/bet_rivers_co.svg' : 'BetRivers'
             }
+        self.__standardize_covers_player_prop_names = {
+            'Points Scored' : 'P',
+            'Points and Rebounds' : 'PR',
+            'Points and Assists': 'PA',
+            '3 Pointers Made' : '3PM',
+            'Rebounds and Assists' : 'RA',
+            'Record a Double Double' : 'DD',
+            'Record a Triple Double' : 'TD',
+            'Score First Field Goal' : 'FFG',
+            'Steals and Blocks' : 'SB',
+            'Total Blocks': 'B',
+            'Total Steals' : 'S',
+            'Total Rebounds' : 'R',
+            'Total Points, Rebounds, and Assists' : 'PRA',
+            'Total Turnovers' : 'TO',
+            'Total Assists' : 'A'
+            }
         self.__cloudsql_broker = cloudsql_broker
 
     def scrape_data(self, site: Site, sport: Sport):
@@ -123,7 +140,6 @@ class scraper:
                 for sb in player_props_map[player][prop_type]:
                     # print(sb)
                     sb_data = player_props_map[player][prop_type][sb]
-                    # number_of_cols = len(sb_data)
                     # print(sb_data)
 
                     line = None
