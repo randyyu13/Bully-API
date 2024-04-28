@@ -1,6 +1,8 @@
 from google.cloud.sql.connector import Connector
 import sqlalchemy
 
+from datetime import datetime
+
 class cloudsql_server_broker:
     def __init__(self, project_id, region, instance_name, user, pswd, db_name):
         self.__instance_connection_name = f"{project_id}:{region}:{instance_name}"
@@ -45,7 +47,12 @@ class cloudsql_server_broker:
             sqlalchemy.engine.result.ResultProxy: The result of the query.
         """
         with self.__engine.connect() as conn:
-            result = conn.execute(query, values)
+            if not values:
+                result = conn.execute(query)
+            else:
+                result = conn.execute(query, values)
+            conn.commit()
+            conn.close()
         return result
     
     def write_to_player_prop_table(self, player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp):
@@ -65,7 +72,17 @@ class cloudsql_server_broker:
         """
         query = """
         INSERT INTO player_prop_table (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        VALUES (:player_name, :prop_type, :sportsbook, :over_line, :under_line, :over_odds, :under_odds, :odds, :timestamp)
         """
-        values = (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp)
-        self.execute_query(query, values)
+        values = {
+            'player_name': player_name,
+            'prop_type': prop_type,
+            'sportsbook': sportsbook,
+            'over_line': over_line,
+            'under_line': under_line,
+            'over_odds': over_odds,
+            'under_odds': under_odds,
+            'odds': odds,
+            'timestamp': timestamp
+        }
+        self.execute_query(sqlalchemy.text(query), values)
