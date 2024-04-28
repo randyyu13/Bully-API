@@ -55,7 +55,7 @@ class cloudsql_server_broker:
             conn.close()
         return result
     
-    def write_to_player_prop_table(self, player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp):
+    def write_to_player_prop_table(self, player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, timestamp):
         """
         Writes data to the 'player_prop_table' table in the 'bullybot_api_database' database.
 
@@ -72,7 +72,7 @@ class cloudsql_server_broker:
         """
         query = """
         INSERT INTO player_prop_table (player_name, prop_type, sportsbook, over_line, under_line, over_odds, under_odds, odds, timestamp)
-        VALUES (:player_name, :prop_type, :sportsbook, :over_line, :under_line, :over_odds, :under_odds, :odds, :timestamp)
+        VALUES (:player_name, :prop_type, :sportsbook, :over_line, :under_line, :over_odds, :under_odds, :timestamp)
         """
         values = {
             'player_name': player_name,
@@ -82,7 +82,6 @@ class cloudsql_server_broker:
             'under_line': under_line,
             'over_odds': over_odds,
             'under_odds': under_odds,
-            'odds': odds,
             'timestamp': timestamp
         }
         self.execute_query(sqlalchemy.text(query), values)
