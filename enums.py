@@ -1,11 +1,11 @@
 from enum import Enum
 
 class Site(Enum):
-    COVERS = 1
-    BETTINGPROS = 2
+    COVERS = hash('COVERS')
+    BETTINGPROS = hash('BETTINGPROS')
 
 class Sport(Enum):
-    NBA = 1
-    MLB = 2
-    NHL = 3
-    NFL = 4
+    NBA = hash('NBA')
+    MLB = hash('MLB')
+    NHL = hash('NHL')
+    NFL = hash('NFL')

@@ -18,22 +18,22 @@ class scraper:
             'https://img.covers.com/covers/data/sportsbooks/caesars.svg' : 'Caesars',
             'https://img.covers.com/covers/data/sportsbooks/bet_rivers_co.svg' : 'BetRivers'
             }
-        self.__standardize_covers_player_prop_names = {
-            'Points Scored' : 'P',
-            'Points and Rebounds' : 'PR',
-            'Points and Assists': 'PA',
-            '3 Pointers Made' : '3PM',
-            'Rebounds and Assists' : 'RA',
-            'Record a Double Double' : 'DD',
-            'Record a Triple Double' : 'TD',
-            'Score First Field Goal' : 'FFG',
-            'Steals and Blocks' : 'SB',
-            'Total Blocks': 'B',
-            'Total Steals' : 'S',
-            'Total Rebounds' : 'R',
-            'Total Points, Rebounds, and Assists' : 'PRA',
-            'Total Turnovers' : 'TO',
-            'Total Assists' : 'A'
+        self.__standardize_covers_NBA_player_prop_names = {
+            'Points Scored' : 'Points',
+            'Points and Rebounds' : 'Points + Rebounds',
+            'Points and Assists': 'Points + Assists',
+            '3 Pointers Made' : '3 Pointers Made',
+            'Rebounds and Assists' : 'Rebounds + Assists',
+            'Record a Double Double' : 'Double Double',
+            'Record a Triple Double' : 'Triple Double',
+            'Score First Field Goal' : 'First Field Goal',
+            'Steals and Blocks' : 'Steals + Blocks',
+            'Total Blocks': 'Blocks',
+            'Total Steals' : 'Steals',
+            'Total Rebounds' : 'Rebounds',
+            'Total Points, Rebounds, and Assists' : 'Points + Rebounds + Assists',
+            'Total Turnovers' : 'Turnovers',
+            'Total Assists' : 'Assists'
             }
         self.__cloudsql_broker = cloudsql_broker
 
@@ -51,6 +51,9 @@ class scraper:
             case _:
                 return
 
+    '''
+    All helper methods
+    '''
     def __scrape_NBA_data_from_covers(self):
         with sync_playwright() as p:
             browser = p.chromium.launch()
@@ -58,7 +61,6 @@ class scraper:
             page.goto('https://www.covers.com/sport/basketball/nba/player-props')
 
             matchups = page.query_selector_all('.props-matchup-list-item')
-
             number_of_matchups = len(matchups)
             
             i = 0
@@ -73,9 +75,11 @@ class scraper:
                         player_prop_set.add(player_name)
                         player_prop_map = self.__populate_NBA_player_props(player_link, browser)
                         self.__upload_props_to_db(player_prop_map)
-                i += 1
                 page.query_selector('#props-event-btn').click()
+
+                i += 1
                 matchups[i].click()
+
                 page.wait_for_load_state("networkidle")
         
     def __populate_NBA_player_props(self, player_link, browser):
@@ -134,23 +138,17 @@ class scraper:
     
     def __upload_props_to_db(self, player_props_map):
         for player in player_props_map:
-            # print(player)
             for prop_type in player_props_map[player]:
-                # print(prop_type)
                 for sb in player_props_map[player][prop_type]:
-                    # print(sb)
                     sb_data = player_props_map[player][prop_type][sb]
-                    # print(sb_data)
 
                     line = None
                     over_odds = None
                     under_odds = None
-                    # odds = None
 
                     line = sb_data['line']
                     over_odds = sb_data['oOdds']
                     under_odds = sb_data['uOdds']
-                    # else:
-                    #     odds = sb_data['odds']
                     print((player, prop_type, sb, line, over_odds, under_odds, datetime.now()))
-                    self.__cloudsql_broker.write_to_player_prop_table(player, prop_type, sb, line, over_odds, under_odds, datetime.now())
+                    standardized_prop_type = self.__standardize_covers_NBA_player_prop_names[prop_type]
+                    self.__cloudsql_broker.write_to_player_prop_table(player, standardized_prop_type, sb, line, over_odds, under_odds, datetime.now())
